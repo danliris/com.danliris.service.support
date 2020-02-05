@@ -26,7 +26,7 @@ namespace com.danliris.support.webapi.Controllers.v1
         private HOrderService hOrderService { get; }
         private ExpenditureGoodsService expenditureGoodsService { get; }
 
-        public CustomsReportController(ScrapService scrapService, WIPService wipService, FactBeacukaiService factBeacukaiService, FactItemMutationService factItemMutationService,FinishedGoodService finishedGoodService, MachineMutationService machineMutationService, HOrderService hOrderService)
+        public CustomsReportController(ScrapService scrapService, WIPService wipService, FactBeacukaiService factBeacukaiService, FactItemMutationService factItemMutationService,FinishedGoodService finishedGoodService, MachineMutationService machineMutationService, HOrderService hOrderService, ExpenditureGoodsService expenditureGoodsService)
 		{
 			this.scrapService = scrapService;
             this.factBeacukaiService = factBeacukaiService;
@@ -35,7 +35,8 @@ namespace com.danliris.support.webapi.Controllers.v1
 			this.finishedGoodService = finishedGoodService;
 			this.machineMutationService = machineMutationService;
             this.hOrderService = hOrderService;
-		}
+            this.expenditureGoodsService = expenditureGoodsService;
+        }
 
         [HttpGet("in")]
         public IActionResult GetIN(string type, DateTime? dateFrom, DateTime? dateTo, int page, int size, string Order = "{}")
