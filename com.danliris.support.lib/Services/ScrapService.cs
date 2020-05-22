@@ -31,6 +31,7 @@ namespace com.danliris.support.lib.Services
 			try
 			{
 				string connectionString = APIEndpoint.ConnectionString;
+				
 				using (SqlConnection conn =
 					new SqlConnection(connectionString))
 				{
