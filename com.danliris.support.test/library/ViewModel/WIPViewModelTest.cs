@@ -22,6 +22,7 @@ namespace com.danliris.support.test.library.ViewModel
             Assert.Equal("Kode", wIPViewModel.Kode);
             Assert.Equal("Comodity", wIPViewModel.Comodity);
             Assert.Equal("UnitQtyName", wIPViewModel.UnitQtyName);
+            Assert.Equal("WIP", wIPViewModel.WIP);
 
         }
     }
