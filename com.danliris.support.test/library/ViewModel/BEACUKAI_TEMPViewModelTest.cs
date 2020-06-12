@@ -35,6 +35,19 @@ namespace com.danliris.support.test.library.ViewModel
             viewModel.TglBCNo = now; 
             viewModel.NamaSupplier = "NamaSupplier";
             viewModel.NamaSupplier = "NamaSupplier";
+            viewModel.Valuta = "Valuta";
+            viewModel.Hari = now;
+            viewModel.JenisBC = "JenisBC";
+            viewModel.IDHeader = 1;
+            viewModel.JenisDokumen = "JenisDokumen";
+            viewModel.NomorDokumen = "NomorDokumen";
+            viewModel.TanggalDokumen = "TanggalDokumen";
+            viewModel.JumlahBarang = 1;
+            viewModel.Sat = "Sat";
+            viewModel.KodeSupplier = "KodeSupplier";
+            viewModel.TglDatang = now;
+
+
 
             Assert.Equal("ID", viewModel.ID);
             Assert.Equal("BCId", viewModel.BCId);
@@ -54,9 +67,17 @@ namespace com.danliris.support.test.library.ViewModel
             Assert.Equal(now, viewModel.TglDaftarAju);
             Assert.Equal(now, viewModel.TglBCNo);
             Assert.Equal("NoAju", viewModel.NoAju);
-            
-
-
+            Assert.Equal(now, viewModel.Hari);
+            Assert.Equal("JenisBC", viewModel.JenisBC);
+            Assert.Equal(1, viewModel.IDHeader);
+            Assert.Equal("JenisDokumen", viewModel.JenisDokumen);
+            Assert.Equal("TanggalDokumen", viewModel.TanggalDokumen);
+            Assert.Equal("NomorDokumen", viewModel.NomorDokumen);
+            Assert.Equal(1, viewModel.JumlahBarang);
+            Assert.Equal("Valuta", viewModel.Valuta);
+            Assert.Equal("Sat", viewModel.Sat);
+            Assert.Equal("KodeSupplier", viewModel.KodeSupplier);
+            Assert.Equal(now, viewModel.TglDatang);
         }
         }
 }
