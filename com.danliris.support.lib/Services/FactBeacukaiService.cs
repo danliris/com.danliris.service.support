@@ -60,7 +60,7 @@ namespace com.danliris.support.lib.Services
             return Query;
         }
 
-        public Tuple<List<FactBeacukaiViewModel>, int> GetReportIN(string type, DateTime? dateFrom, DateTime? dateTo, int page, int size, string Order, int offset)
+        public virtual Tuple<List<FactBeacukaiViewModel>, int> GetReportIN(string type, DateTime? dateFrom, DateTime? dateTo, int page, int size, string Order, int offset)
         {
             var Query = GetReportINQuery(type, dateFrom, dateTo, offset);
 
@@ -102,7 +102,7 @@ namespace com.danliris.support.lib.Services
             return Tuple.Create(Data, TotalData);
         }
         
-        public MemoryStream GenerateExcelIN(string type, DateTime? dateFrom, DateTime? dateTo, int offset)
+        public virtual MemoryStream GenerateExcelIN(string type, DateTime? dateFrom, DateTime? dateTo, int offset)
         {
             var Query = GetReportINQuery(type, dateFrom, dateTo, offset);
             Query = Query.OrderBy(b => b.BCType).ThenBy(b => b.BCNo);
@@ -244,7 +244,7 @@ namespace com.danliris.support.lib.Services
             return Query;
         }
 
-        public Tuple<List<FactBeacukaiViewModel>, int> GetReportOUT(string type, DateTime? dateFrom, DateTime? dateTo, int page, int size, string Order, int offset)
+        public virtual Tuple<List<FactBeacukaiViewModel>, int> GetReportOUT(string type, DateTime? dateFrom, DateTime? dateTo, int page, int size, string Order, int offset)
         {
             var Query = GetReportOUTQuery(type, dateFrom, dateTo, offset);
 
@@ -287,7 +287,7 @@ namespace com.danliris.support.lib.Services
             return Tuple.Create(Data, TotalData);
         }
 
-        public MemoryStream GenerateExcelOUT(string type, DateTime? dateFrom, DateTime? dateTo, int offset)
+        public virtual MemoryStream GenerateExcelOUT(string type, DateTime? dateFrom, DateTime? dateTo, int offset)
         {
             var Query = GetReportOUTQuery(type, dateFrom, dateTo, offset);
             Query = Query.OrderBy(b => b.BCType).ThenBy(b => b.BCNo);

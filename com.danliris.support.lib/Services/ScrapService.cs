@@ -21,7 +21,7 @@ namespace com.danliris.support.lib.Services
 		}
 
 
-		public IQueryable<ScrapViewModel> GetScrapReport(DateTime? dateFrom, DateTime? dateTo, int offset)
+		public virtual IQueryable<ScrapViewModel> GetScrapReport(DateTime? dateFrom, DateTime? dateTo, int offset)
 		{
 			DateTime Datefrom = dateFrom == null ? new DateTime(1970, 1, 1) : (DateTime)dateFrom;
 			DateTime Dateto = dateTo == null ? new DateTime(1970, 1, 1) : (DateTime)dateTo;
@@ -74,7 +74,7 @@ namespace com.danliris.support.lib.Services
 			return scrapData.AsQueryable();
 		}
 
-        public MemoryStream GenerateExcel(DateTime? dateFrom, DateTime? dateTo, int offset)
+        public virtual MemoryStream GenerateExcel(DateTime? dateFrom, DateTime? dateTo, int offset)
         {
             var Query = GetScrapReport(dateFrom, dateTo, offset);
             DataTable result = new DataTable();

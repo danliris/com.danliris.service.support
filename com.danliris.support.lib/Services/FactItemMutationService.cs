@@ -100,7 +100,7 @@ namespace com.danliris.support.lib.Services
             return reportData.AsQueryable();
         }
 
-        public Tuple<List<FactMutationItemViewModel>, int> GetReportBBUnit(int unit, DateTime? dateFrom, DateTime? dateTo, int page, int size, string Order, int offset)
+        public virtual Tuple<List<FactMutationItemViewModel>, int> GetReportBBUnit(int unit, DateTime? dateFrom, DateTime? dateTo, int page, int size, string Order, int offset)
         {
             var Query = GetUnitItemBBReport(unit, dateFrom, dateTo, offset);
 
@@ -126,7 +126,7 @@ namespace com.danliris.support.lib.Services
             return Tuple.Create(Data, TotalData);
         }
 
-        public MemoryStream GenerateExcelBBUnit(int unit, DateTime? dateFrom, DateTime? dateTo, int offset)
+        public virtual MemoryStream GenerateExcelBBUnit(int unit, DateTime? dateFrom, DateTime? dateTo, int offset)
         {
             var Query = GetUnitItemBBReport(unit, dateFrom, dateTo, offset);
             Query = Query.OrderBy(b => b.ItemCode);
@@ -231,7 +231,7 @@ namespace com.danliris.support.lib.Services
             return reportData.AsQueryable();
         }
 
-        public Tuple<List<FactMutationItemViewModel>, int> GetReportBPUnit(int unit, DateTime? dateFrom, DateTime? dateTo, int page, int size, string Order, int offset)
+        public virtual Tuple<List<FactMutationItemViewModel>, int> GetReportBPUnit(int unit, DateTime? dateFrom, DateTime? dateTo, int page, int size, string Order, int offset)
         {
             var Query = GetUnitItemBPReport(unit, dateFrom, dateTo, offset);
 
@@ -257,7 +257,7 @@ namespace com.danliris.support.lib.Services
             return Tuple.Create(Data, TotalData);
         }
 
-        public MemoryStream GenerateExcelBPUnit(int unit, DateTime? dateFrom, DateTime? dateTo, int offset)
+        public virtual MemoryStream GenerateExcelBPUnit(int unit, DateTime? dateFrom, DateTime? dateTo, int offset)
         {
             var Query = GetUnitItemBPReport(unit, dateFrom, dateTo, offset);
             Query = Query.OrderBy(b => b.ItemCode);
@@ -397,7 +397,7 @@ namespace com.danliris.support.lib.Services
             return reportData.AsQueryable();
         }
 
-        public Tuple<List<FactMutationItemViewModel>, int> GetReportBPCentral( DateTime? dateFrom, DateTime? dateTo, int page, int size, string Order, int offset)
+        public virtual Tuple<List<FactMutationItemViewModel>, int> GetReportBPCentral( DateTime? dateFrom, DateTime? dateTo, int page, int size, string Order, int offset)
         {
             var Query = GetCentralItemBPReport(dateFrom, dateTo, offset);
 
@@ -423,7 +423,7 @@ namespace com.danliris.support.lib.Services
             return Tuple.Create(Data, TotalData);
         }
 
-        public MemoryStream GenerateExcelBPCentral(DateTime? dateFrom, DateTime? dateTo, int offset)
+        public virtual MemoryStream GenerateExcelBPCentral(DateTime? dateFrom, DateTime? dateTo, int offset)
         {
             var Query = GetCentralItemBPReport(dateFrom, dateTo, offset);
             Query = Query.OrderBy(b => b.ItemCode);
@@ -562,7 +562,7 @@ namespace com.danliris.support.lib.Services
             return reportData.AsQueryable();
         }
 
-        public Tuple<List<FactMutationItemViewModel>, int> GetReportBBCentral(DateTime? dateFrom, DateTime? dateTo, int page, int size, string Order, int offset)
+        public virtual Tuple<List<FactMutationItemViewModel>, int> GetReportBBCentral(DateTime? dateFrom, DateTime? dateTo, int page, int size, string Order, int offset)
         {
             var Query = GetCentralItemBBReport(dateFrom, dateTo, offset);
 
@@ -588,7 +588,7 @@ namespace com.danliris.support.lib.Services
             return Tuple.Create(Data, TotalData);
         }
 
-        public MemoryStream GenerateExcelBBCentral(DateTime? dateFrom, DateTime? dateTo, int offset)
+        public virtual MemoryStream GenerateExcelBBCentral(DateTime? dateFrom, DateTime? dateTo, int offset)
         {
             var Query = GetCentralItemBBReport(dateFrom, dateTo, offset);
             Query = Query.OrderBy(b => b.ItemCode);

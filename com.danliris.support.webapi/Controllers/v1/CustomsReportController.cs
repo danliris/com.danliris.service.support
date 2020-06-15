@@ -278,7 +278,7 @@ namespace com.danliris.support.webapi.Controllers.v1
         }
 
         [HttpGet("machine-mutation/download")]
-        public IActionResult GetXlsMachine(DateTime? dateFrom, DateTime? dateTo)
+        public virtual IActionResult GetXlsMachine(DateTime? dateFrom, DateTime? dateTo)
         {
             int offset = Convert.ToInt32(Request.Headers["x-timezone-offset"]);
             string accept = Request.Headers["Accept"];
