@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<SerializableModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <tasks>
+    <tasks>
+      <Task>
+        <blocks />
+        <tabs>
+          <DocumentTab>
+            <name>CustomsReportControllerTest.cs</name>
+            <path>com.danliris.support.test\webapi\Controllers\v1\CustomsReportControllerTest.cs</path>
+            <absolutePath>C:\Users\ade.pamungkas\moonlay\com.danliris.service.support\com.danliris.support.test\webapi\Controllers\v1\CustomsReportControllerTest.cs</absolutePath>
+            <position>
+              <line>75</line>
+              <column>1</column>
+              <lineHash>ECtRuXZaVqPomffPDuOOUlH5xQOzV7MwpJGD63sVVgQ=</lineHash>
+            </position>
+          </DocumentTab>
+          <DocumentTab>
+            <name>CustomsReportController.cs</name>
+            <path>com.danliris.support.webapi\Controllers\v1\CustomsReportController.cs</path>
+            <absolutePath>C:\Users\ade.pamungkas\moonlay\com.danliris.service.support\com.danliris.support.webapi\Controllers\v1\CustomsReportController.cs</absolutePath>
+            <position>
+              <line>150</line>
+              <column>27</column>
+              <lineHash>FyO/hys+3M8nlB/KvtuQDOX9/yo8ITC2jD7+1fmx9o0=</lineHash>
+            </position>
+          </DocumentTab>
+        </tabs>
+        <name>Misc</name>
+        <selectedBlock>-1</selectedBlock>
+        <selectedTab>-1</selectedTab>
+        <startupProjects />
+        <startupProjectsInitialized>false</startupProjectsInitialized>
+      </Task>
+    </tasks>
+    <selectedTask>0</selectedTask>
+  </tasks>
+</SerializableModel>

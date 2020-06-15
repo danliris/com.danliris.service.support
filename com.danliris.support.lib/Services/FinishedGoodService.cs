@@ -17,7 +17,7 @@ namespace com.danliris.support.lib.Services
 		{
 			this.context = _context;
 		}
-		public IQueryable<FinishedGoodViewModel> GetFinishedGoodReport(DateTime? dateFrom, DateTime? dateTo, int offset)
+		public virtual IQueryable<FinishedGoodViewModel> GetFinishedGoodReport(DateTime? dateFrom, DateTime? dateTo, int offset)
 		{
 			DateTime Datefrom = dateFrom == null ? new DateTime(1970, 1, 1) : (DateTime)dateFrom;
 			DateTime Dateto = dateTo == null ? new DateTime(1970, 1, 1) : (DateTime)dateTo;
@@ -91,7 +91,7 @@ namespace com.danliris.support.lib.Services
 			return wipData.AsQueryable();
 		}
 
-        public MemoryStream GenerateExcel(DateTime? dateFrom, DateTime? dateTo, int offset)
+        public virtual MemoryStream GenerateExcel(DateTime? dateFrom, DateTime? dateTo, int offset)
         {
             var Query = GetFinishedGoodReport(dateFrom, dateTo, offset);
             Query = Query.OrderBy(b => b.KodeBarang);

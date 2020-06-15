@@ -75,7 +75,7 @@ namespace com.danliris.support.lib.Services
 
 			return machine.AsQueryable();
 		}
-        public Tuple<List<FinishedGoodViewModel>, int> GetMachineMutationReportData(DateTime? dateFrom, DateTime? dateTo, int page, int size, string Order, int offset)
+        public virtual Tuple<List<FinishedGoodViewModel>, int> GetMachineMutationReportData(DateTime? dateFrom, DateTime? dateTo, int page, int size, string Order, int offset)
         {
             var Query = GetMachineMutationReport(dateFrom, dateTo, offset);
 
@@ -101,7 +101,7 @@ namespace com.danliris.support.lib.Services
             return Tuple.Create(Data, TotalData);
         }
 
-        public MemoryStream GenerateExcel(DateTime? dateFrom, DateTime? dateTo, int offset)
+        public virtual MemoryStream GenerateExcel(DateTime? dateFrom, DateTime? dateTo, int offset)
         {
             var Query = GetMachineMutationReport(dateFrom, dateTo, offset);
             Query = Query.OrderBy(b => b.KodeBarang);

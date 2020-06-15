@@ -17,7 +17,7 @@ namespace com.danliris.support.lib.Services
 		{
 			this.context = _context;
 		}
-		public IQueryable<WIPViewModel> GetWIPReport(DateTime? date, int offset)
+		public virtual IQueryable<WIPViewModel> GetWIPReport(DateTime? date, int offset)
 		{
 			DateTime Date = date == null ? new DateTime(1970, 1, 1) : (DateTime)date;
 			string Dates = Date.ToString("yyyy-MM-dd");
@@ -59,7 +59,7 @@ namespace com.danliris.support.lib.Services
 			return wipData.AsQueryable();
 		}
 
-        public MemoryStream GenerateExcel(DateTime? date, int offset)
+        public virtual MemoryStream GenerateExcel(DateTime? date, int offset)
         {
             var Query = GetWIPReport(date, offset);
             Query = Query.OrderBy(b => b.Kode).ThenBy(b=>b.Comodity);
