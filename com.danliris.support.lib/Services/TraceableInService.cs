@@ -369,8 +369,8 @@ namespace com.danliris.support.lib.Services
                 //var index = 0;
                 foreach (var item in Query)
                 {
-                    string bcdate = String.IsNullOrWhiteSpace(item.BCDate) ? "-" : Convert.ToDateTime(item.BCDate).ToString("dd MMM yyyy", new CultureInfo("id-ID"));
-                    string pebdate = String.IsNullOrWhiteSpace(item.PEBDate) ? "-" : Convert.ToDateTime(item.PEBDate).ToString("dd MMM yyyy", new CultureInfo("id-ID"));
+                    string bcdate = String.IsNullOrWhiteSpace(item.BCDate) || Convert.ToDateTime(item.BCDate) == new DateTime(1970, 1, 1) ? "-" : Convert.ToDateTime(item.BCDate).ToString("dd MMM yyyy", new CultureInfo("id-ID"));
+                    string pebdate = String.IsNullOrWhiteSpace(item.PEBDate) || Convert.ToDateTime(item.PEBDate) == new DateTime(1970, 1, 1) ? "-" : Convert.ToDateTime(item.PEBDate).ToString("dd MMM yyyy", new CultureInfo("id-ID"));
                     result.Rows.Add(item.count, item.BCType, item.BCNo, bcdate, item.BonNo, item.PO, item.ItemCode, item.ItemName, item.ReceiptQty, item.SatuanReceipt, item.ROJob, item.BUK, item.QtyBUK, item.SatuanBUK,item.Sisa, item.ProduksiQty, item.BJQty, item.Invoice, item.PEB, pebdate, item.EksporQty, item.SampleQty);
 
                 }
@@ -388,104 +388,112 @@ namespace com.danliris.support.lib.Services
                 //sheet.Cells["E1:F1"].Merge = true;
                 //sheet.Cells["C1:D1"].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
 
+                Dictionary<string, int> docspan = new Dictionary<string, int>();
+                Dictionary<string, int> rowspan = new Dictionary<string, int>();
+                Dictionary<string, int> bcnospan = new Dictionary<string, int>();
+                Dictionary<string, int> rospan = new Dictionary<string, int>();
+                Dictionary<string, int> docspanpo = new Dictionary<string, int>();
                 Dictionary<string, int> counts = new Dictionary<string, int>();
-                Dictionary<string, int> countsType = new Dictionary<string, int>();
-                Dictionary<string, int> countsPO = new Dictionary<string, int>();
-                Dictionary<string, int> countsPEB = new Dictionary<string, int>();
-                Dictionary<string, int> countsekspor = new Dictionary<string, int>();
-                Dictionary<string, int> countsRO = new Dictionary<string, int>();
                 Dictionary<string, int> countsBUK = new Dictionary<string, int>();
                 var docNo = Query.ToArray();
                 int value;
                 foreach (var a in Query)
                 {
+                    //if (counts.TryGetValue( a.BCType + a.BCNo + a.BCDate, out value))
+                    //{
+                    //    docspan[a.BCType + a.BCNo + a.BCDate]++;
+                    //}
+                    //else
+                    //{
+                    //    docspan[a.BCType + a.BCNo + a.BCDate] = 1;
+                    //}
                     //FactBeacukaiViewModel dup = Array.Find(docNo, o => o.BCType == a.BCType && o.BCNo == a.BCNo);
-                    if (counts.TryGetValue(a.BCType + a.BCNo + a.BonNo, out value))
+                    if (docspan.TryGetValue(a.BCNo + a.BCType + a.BonNo + a.PO + a.ItemCode + a.ItemName + a.ReceiptQty + a.SatuanReceipt, out value))
                     {
-                        counts[a.BCType + a.BCNo + a.BonNo]++;
+                        docspan[a.BCNo + a.BCType + a.BonNo + a.PO + a.ItemCode + a.ItemName + a.ReceiptQty + a.SatuanReceipt]++;
                     }
                     else
                     {
-                        counts[a.BCType + a.BCNo + a.BonNo] = 1;
+                        docspan[a.BCNo + a.BCType + a.BonNo + a.PO + a.ItemCode + a.ItemName + a.ReceiptQty + a.SatuanReceipt] = 1;
                     }
 
                     //FactBeacukaiViewModel dup1 = Array.Find(docNo, o => o.BCType == a.BCType);
-                    if (countsType.TryGetValue(a.BCType, out value))
+                    if (rowspan.TryGetValue(a.BCType + a.BCNo + a.BCDate + a.BonNo, out value))
                     {
-                        countsType[a.BCType]++;
+                        rowspan[a.BCType + a.BCNo + a.BCDate + a.BonNo]++;
                     }
                     else
                     {
-                        countsType[a.BCType] = 1;
+                        rowspan[a.BCType + a.BCNo + a.BCDate + a.BonNo] = 1;
                     }
 
-                    if (countsPO.TryGetValue(a.BonNo + a.PO + a.ItemCode + a.ItemName + a.SatuanReceipt, out value))
+                    if (bcnospan.TryGetValue(a.BCType + a.BCNo + a.BCDate, out value))
                     {
-                        countsPO[a.BonNo + a.PO + a.ItemCode + a.ItemName + a.SatuanReceipt]++;
+                        bcnospan[a.BCType + a.BCNo + a.BCDate]++;
                     }
                     else
                     {
-                        countsPO[a.BonNo + a.PO + a.ItemCode + a.ItemName + a.SatuanReceipt] = 1;
+                        bcnospan[a.BCType + a.BCNo + a.BCDate] = 1;
                     }
-                    if (countsPEB.TryGetValue(a.PEB + a.Invoice, out value))
+                    if (rospan.TryGetValue(a.BCNo + a.BCType + a.BonNo + a.PO + a.ItemCode + a.ItemName, out value))
                     {
-                        countsPEB[a.PEB + a.Invoice]++;
+                        rospan[a.BCNo + a.BCType + a.BonNo + a.PO + a.ItemCode + a.ItemName]++;
                     }
                     else
                     {
-                        countsPEB[a.PEB + a.Invoice] = 1;
+                        rospan[a.BCNo + a.BCType + a.BonNo + a.PO + a.ItemCode + a.ItemName] = 1;
                     }
-                    if (countsekspor.TryGetValue(a.Invoice + a.EksporQty + a.BJQty + a.ProduksiQty + a.PO, out value))
+                    if (docspanpo.TryGetValue(a.BCNo + a.BCType + a.BonNo + a.PO + a.ItemCode + a.ItemName + a.ReceiptQty + a.SatuanReceipt + a.ROJob + a.BUK, out value))
                     {
-                        countsekspor[a.Invoice + a.EksporQty + a.BJQty + a.ProduksiQty + a.PO]++;
+                        docspanpo[a.BCNo + a.BCType + a.BonNo + a.PO + a.ItemCode + a.ItemName + a.ReceiptQty + a.SatuanReceipt + a.ROJob + a.BUK]++;
                     }
                     else
                     {
-                        countsekspor[a.Invoice + a.EksporQty + a.BJQty + a.ProduksiQty + a.PO] = 1;
+                        docspanpo[a.BCNo + a.BCType + a.BonNo + a.PO + a.ItemCode + a.ItemName + a.ReceiptQty + a.SatuanReceipt + a.ROJob + a.BUK] = 1;
                     }
-                    if (countsRO.TryGetValue(a.ROJob + a.Invoice + a.PO, out value))
-                    {
-                        countsRO[a.ROJob + a.Invoice + a.PO]++;
-                    }
-                    else
-                    {
-                        countsRO[a.ROJob + a.Invoice + a.PO] = 1;
-                    }
-                    if(countsBUK.TryGetValue(a.PO + a.ItemCode + a.ItemName + a.SatuanReceipt + a.QtyBUK + a.BUK + a.BonNo + a.Sisa, out value))
-                    {
-                        countsBUK[a.PO + a.ItemCode + a.ItemName + a.SatuanReceipt + a.QtyBUK + a.BUK + a.BonNo + a.Sisa]++;
-                    }
-                    else
-                    {
-                        countsBUK[a.PO + a.ItemCode + a.ItemName + a.SatuanReceipt + a.QtyBUK + a.BUK + a.BonNo + a.Sisa] = 1;
-                    }
+                    //if (countsRO.TryGetValue(a.ROJob + a.Invoice + a.PO, out value))
+                    //{
+                    //    countsRO[a.ROJob + a.Invoice + a.PO]++;
+                    //}
+                    //else
+                    //{
+                    //    countsRO[a.ROJob + a.Invoice + a.PO] = 1;
+                    //}
+                    //if(countsBUK.TryGetValue(a.PO + a.ItemCode + a.ItemName + a.SatuanReceipt + a.QtyBUK + a.BUK + a.BonNo + a.Sisa, out value))
+                    //{
+                    //    countsBUK[a.PO + a.ItemCode + a.ItemName + a.SatuanReceipt + a.QtyBUK + a.BUK + a.BonNo + a.Sisa]++;
+                    //}
+                    //else
+                    //{
+                    //    countsBUK[a.PO + a.ItemCode + a.ItemName + a.SatuanReceipt + a.QtyBUK + a.BUK + a.BonNo + a.Sisa] = 1;
+                    //}
                 }
 
                 int index = 2;
-                foreach (KeyValuePair<string, int> b in counts)
+                foreach (KeyValuePair<string, int> b in bcnospan)
                 {
                     sheet.Cells["A" + index + ":A" + (index + b.Value - 1)].Merge = true;
                     sheet.Cells["A" + index + ":A" + (index + b.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
+                    sheet.Cells["B" + index + ":B" + (index + b.Value - 1)].Merge = true;
+                    sheet.Cells["B" + index + ":B" + (index + b.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
                     sheet.Cells["C" + index + ":C" + (index + b.Value - 1)].Merge = true;
                     sheet.Cells["C" + index + ":C" + (index + b.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
                     sheet.Cells["D" + index + ":D" + (index + b.Value - 1)].Merge = true;
                     sheet.Cells["D" + index + ":D" + (index + b.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
-                    sheet.Cells["E" + index + ":E" + (index + b.Value - 1)].Merge = true;
-                    sheet.Cells["E" + index + ":E" + (index + b.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
-                    sheet.Cells["V" + index + ":V" + (index + b.Value - 1)].Merge = true;
-                    sheet.Cells["V" + index + ":V" + (index + b.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
+                    //sheet.Cells["V" + index + ":V" + (index + b.Value - 1)].Merge = true;
+                    //sheet.Cells["V" + index + ":V" + (index + b.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
                     index += b.Value;
                 }
 
                 index = 2;
-                foreach (KeyValuePair<string, int> c in countsType)
+                foreach (KeyValuePair<string, int> c in rospan)
                 {
-                    sheet.Cells["B" + index + ":B" + (index + c.Value - 1)].Merge = true;
-                    sheet.Cells["B" + index + ":B" + (index + c.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
+                    sheet.Cells["E" + index + ":E" + (index + c.Value - 1)].Merge = true;
+                    sheet.Cells["E" + index + ":E" + (index + c.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
                     index += c.Value;
                 }
                 index = 2;
-                foreach (KeyValuePair<string, int> c in countsPO)
+                foreach (KeyValuePair<string, int> c in docspan)
                 {
                     sheet.Cells["F" + index + ":F" + (index + c.Value - 1)].Merge = true;
                     sheet.Cells["F" + index + ":F" + (index + c.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
@@ -493,6 +501,15 @@ namespace com.danliris.support.lib.Services
                     sheet.Cells["G" + index + ":G" + (index + c.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
                     sheet.Cells["H" + index + ":H" + (index + c.Value - 1)].Merge = true;
                     sheet.Cells["H" + index + ":H" + (index + c.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
+                    //sheet.Cells["I" + index + ":I" + (index + c.Value - 1)].Merge = true;
+                    //sheet.Cells["I" + index + ":I" + (index + c.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
+                    //sheet.Cells["J" + index + ":J" + (index + c.Value - 1)].Merge = true;
+                    //sheet.Cells["J" + index + ":J" + (index + c.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
+                    index += c.Value;
+                }
+                index = 2;
+                foreach (KeyValuePair<string, int> c in rowspan)
+                {
                     sheet.Cells["I" + index + ":I" + (index + c.Value - 1)].Merge = true;
                     sheet.Cells["I" + index + ":I" + (index + c.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
                     sheet.Cells["J" + index + ":J" + (index + c.Value - 1)].Merge = true;
@@ -500,37 +517,10 @@ namespace com.danliris.support.lib.Services
                     index += c.Value;
                 }
                 index = 2;
-                foreach (KeyValuePair<string, int> c in countsRO)
+                foreach (KeyValuePair<string, int> c in docspanpo)
                 {
                     sheet.Cells["K" + index + ":K" + (index + c.Value - 1)].Merge = true;
                     sheet.Cells["K" + index + ":K" + (index + c.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
-                    index += c.Value;
-                }
-                index = 2;
-                foreach (KeyValuePair<string, int> c in countsPEB)
-                {
-                    sheet.Cells["R" + index + ":R" + (index + c.Value - 1)].Merge = true;
-                    sheet.Cells["R" + index + ":R" + (index + c.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
-                    sheet.Cells["S" + index + ":S" + (index + c.Value - 1)].Merge = true;
-                    sheet.Cells["S" + index + ":S" + (index + c.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
-                    sheet.Cells["T" + index + ":T" + (index + c.Value - 1)].Merge = true;
-                    sheet.Cells["T" + index + ":T" + (index + c.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
-                    index += c.Value;
-                }
-                index = 2;
-                foreach (KeyValuePair<string, int> c in countsekspor)
-                {
-                    sheet.Cells["P" + index + ":P" + (index + c.Value - 1)].Merge = true;
-                    sheet.Cells["P" + index + ":P" + (index + c.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
-                    sheet.Cells["Q" + index + ":Q" + (index + c.Value - 1)].Merge = true;
-                    sheet.Cells["Q" + index + ":Q" + (index + c.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
-                    sheet.Cells["U" + index + ":U" + (index + c.Value - 1)].Merge = true;
-                    sheet.Cells["U" + index + ":U" + (index + c.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
-                    index += c.Value;
-                }
-                index = 2;
-                foreach (KeyValuePair<string, int> c in countsBUK)
-                {
                     sheet.Cells["L" + index + ":L" + (index + c.Value - 1)].Merge = true;
                     sheet.Cells["L" + index + ":L" + (index + c.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
                     sheet.Cells["M" + index + ":M" + (index + c.Value - 1)].Merge = true;
@@ -539,8 +529,36 @@ namespace com.danliris.support.lib.Services
                     sheet.Cells["N" + index + ":N" + (index + c.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
                     sheet.Cells["O" + index + ":O" + (index + c.Value - 1)].Merge = true;
                     sheet.Cells["O" + index + ":O" + (index + c.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
+                    sheet.Cells["P" + index + ":P" + (index + c.Value - 1)].Merge = true;
+                    sheet.Cells["P" + index + ":P" + (index + c.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
+                    sheet.Cells["Q" + index + ":Q" + (index + c.Value - 1)].Merge = true;
+                    sheet.Cells["Q" + index + ":Q" + (index + c.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
                     index += c.Value;
                 }
+                //index = 2;
+                //foreach (KeyValuePair<string, int> c in countsekspor)
+                //{
+                //    sheet.Cells["P" + index + ":P" + (index + c.Value - 1)].Merge = true;
+                //    sheet.Cells["P" + index + ":P" + (index + c.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
+                //    sheet.Cells["Q" + index + ":Q" + (index + c.Value - 1)].Merge = true;
+                //    sheet.Cells["Q" + index + ":Q" + (index + c.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
+                //    sheet.Cells["U" + index + ":U" + (index + c.Value - 1)].Merge = true;
+                //    sheet.Cells["U" + index + ":U" + (index + c.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
+                //    index += c.Value;
+                //}
+                //index = 2;
+                //foreach (KeyValuePair<string, int> c in countsBUK)
+                //{
+                //    sheet.Cells["L" + index + ":L" + (index + c.Value - 1)].Merge = true;
+                //    sheet.Cells["L" + index + ":L" + (index + c.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
+                //    sheet.Cells["M" + index + ":M" + (index + c.Value - 1)].Merge = true;
+                //    sheet.Cells["M" + index + ":M" + (index + c.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
+                //    sheet.Cells["N" + index + ":N" + (index + c.Value - 1)].Merge = true;
+                //    sheet.Cells["N" + index + ":N" + (index + c.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
+                //    sheet.Cells["O" + index + ":O" + (index + c.Value - 1)].Merge = true;
+                //    sheet.Cells["O" + index + ":O" + (index + c.Value - 1)].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
+                //    index += c.Value;
+                //}
                 sheet.Cells[sheet.Dimension.Address].AutoFitColumns();
             }
             MemoryStream stream = new MemoryStream();
