@@ -55,15 +55,16 @@ namespace com.danliris.support.webapi
 
             var keyVaultEnpoint = new Uri(Configuration["VaultKey"]);
             var secretClient = new SecretClient(keyVaultEnpoint, new DefaultAzureCredential());
-
-            KeyVaultSecret kvs = secretClient.GetSecret(Configuration["VaultKeySecret"]);
+            
+            KeyVaultSecret kvsDB = secretClient.GetSecret(Configuration["VaultKeyDbSecret"]);
+            KeyVaultSecret kvsServer = secretClient.GetSecret(Configuration["VaultKeyServerSecret"]);
 
             //Get Credential Ceisa
             CredentialCeisa.Username = Configuration.GetValue<string>("UsernameCeisa") ?? Configuration["UsernameCeisa"];
             CredentialCeisa.Password = Configuration.GetValue<string>("PasswordCeisa") ?? Configuration["PasswordCeisa"];
 
             services
-                .AddDbContext<SupportDbContext>(option => option.UseSqlServer(kvs.Value))
+                .AddDbContext<SupportDbContext>(option => option.UseSqlServer(string.Concat(kvsDB.Value, kvsServer.Value)))
 				//.AddDbContext<SupportDbContext>(options => options.UseSqlServer(connectionString))
 				.AddApiVersioning(options =>
                 {
