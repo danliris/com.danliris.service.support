@@ -25,6 +25,8 @@ using com.danliris.support.lib.Interfaces.Ceisa;
 using com.danliris.support.lib.Services.Ceisa;
 using com.danliris.support.lib.Services.Ceisa.TPB;
 using com.danliris.support.lib.Interfaces.Ceisa.TPB;
+using Azure.Security.KeyVault.Secrets;
+using Azure.Identity;
 
 namespace com.danliris.support.webapi
 {
@@ -45,18 +47,25 @@ namespace com.danliris.support.webapi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            string connectionString = Configuration.GetConnectionString("DefaultConnection") ?? Configuration["DefaultConnection"];
+            //string connectionString = Configuration.GetConnectionString("DefaultConnection") ?? Configuration["DefaultConnection"];
 			string LocalDbConnectionString = Configuration.GetConnectionString("LocalDbProductionConnection") ?? Configuration["LocalDbProductionConnection"];
 			APIEndpoint.ConnectionString = Configuration.GetConnectionString("DefaultConnection") ?? Configuration["DefaultConnection"];
             APIEndpoint.LocalConnectionString = Configuration.GetConnectionString("LocalDbProductionConnection") ?? Configuration["LocalDbProductionConnection"];
             APIEndpoint.HostToHost = Configuration.GetValue<string>("HostToHostEndpoint") ?? Configuration["HostToHostEndpoint"];
+
+            var keyVaultEnpoint = new Uri(Configuration["VaultKey"]);
+            var secretClient = new SecretClient(keyVaultEnpoint, new DefaultAzureCredential());
+            
+            KeyVaultSecret kvsDB = secretClient.GetSecret(Configuration["VaultKeyDbSecret"]);
+            KeyVaultSecret kvsServer = secretClient.GetSecret(Configuration["VaultKeyServerSecret"]);
 
             //Get Credential Ceisa
             CredentialCeisa.Username = Configuration.GetValue<string>("UsernameCeisa") ?? Configuration["UsernameCeisa"];
             CredentialCeisa.Password = Configuration.GetValue<string>("PasswordCeisa") ?? Configuration["PasswordCeisa"];
 
             services
-				.AddDbContext<SupportDbContext>(options => options.UseSqlServer(connectionString))
+                .AddDbContext<SupportDbContext>(option => option.UseSqlServer(string.Concat(kvsDB.Value, kvsServer.Value)))
+				//.AddDbContext<SupportDbContext>(options => options.UseSqlServer(connectionString))
 				.AddApiVersioning(options =>
                 {
                     options.ReportApiVersions = true;
