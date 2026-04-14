@@ -96,9 +96,9 @@ namespace com.danliris.support.webapi.Controllers.v1.Ceisa
             try
             {
                 identityService.Username = User.Claims.Single(p => p.Type.Equals("username")).Value;
-                var authCeisa = Request.Headers["AuthorizationCeisa"].First();
+                //var authCeisa = Request.Headers["AuthorizationCeisa"].First();
 
-                var data = await ceisaService.GetValutaRate(kode, authCeisa);
+                var data = await ceisaService.GetValutaRate(kode, null);
 
                 return Ok(new
                 {
@@ -123,9 +123,9 @@ namespace com.danliris.support.webapi.Controllers.v1.Ceisa
             try
             {
                 identityService.Username = User.Claims.Single(p => p.Type.Equals("username")).Value;
-                var authCeisa = Request.Headers["AuthorizationCeisa"].First();
+                //var authCeisa = Request.Headers["AuthorizationCeisa"].First();
 
-                var data = await ceisaService.GetLartas(kode, authCeisa);
+                var data = await ceisaService.GetLartas(kode, null);
 
                 return Ok(new
                 {
@@ -146,14 +146,42 @@ namespace com.danliris.support.webapi.Controllers.v1.Ceisa
         }
 
         [HttpGet("getManifes")]
-        public async Task<IActionResult> getManifes(string kodeKantor, string noHostBl, DateTime tglHostBl)
+        public async Task<IActionResult> getManifes(string kodeKantor, string noHostBl, DateTime tglHostBl, string nama)
         {
             try
             {
                 identityService.Username = User.Claims.Single(p => p.Type.Equals("username")).Value;
-                var authCeisa = Request.Headers["AuthorizationCeisa"].First();
+                //var authCeisa = Request.Headers["AuthorizationCeisa"].First();
 
-                var data = await ceisaService.GetManifestBC11(kodeKantor,noHostBl,tglHostBl, authCeisa);
+                var data = await ceisaService.GetManifestBC11(kodeKantor,noHostBl,tglHostBl,nama,null);
+
+                return Ok(new
+                {
+                    apiVersion = ApiVersion,
+                    data = data,
+                    message = General.OK_MESSAGE,
+                    statusCode = General.OK_STATUS_CODE
+                }
+                );
+            }
+            catch (Exception e)
+            {
+                Dictionary<string, object> Result =
+                    new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
+                    .Fail();
+                return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
+            }
+        }
+
+        [HttpGet("getPelabuhan")]
+        public async Task<IActionResult> getPelabuhan(string kodeKantor)
+        {
+            try
+            {
+                identityService.Username = User.Claims.Single(p => p.Type.Equals("username")).Value;
+                //var authCeisa = Request.Headers["AuthorizationCeisa"].First();
+
+                var data = await ceisaService.GetPelabuhan(kodeKantor, null);
 
                 return Ok(new
                 {
@@ -179,9 +207,9 @@ namespace com.danliris.support.webapi.Controllers.v1.Ceisa
             try
             {
                 identityService.Username = User.Claims.Single(p => p.Type.Equals("username")).Value;
-                var authCeisa = Request.Headers["AuthorizationCeisa"].First();
+                //var authCeisa = Request.Headers["AuthorizationCeisa"].First();
 
-                var data = await ceisaService.GetTarifHS(kode, authCeisa);
+                var data = await ceisaService.GetTarifHS(kode, null);
 
                 return Ok(new
                 {
@@ -208,8 +236,8 @@ namespace com.danliris.support.webapi.Controllers.v1.Ceisa
             {
                 identityService.Username = User.Claims.Single(p => p.Type.Equals("username")).Value;
                 identityService.Token = Request.Headers["Authorization"].First().Replace("Bearer ", "");
-                var authCeisa = Request.Headers["AuthorizationCeisa"].First();
-                var data = pEBService.ReadByIdToPushAsync(id, authCeisa);
+                //var authCeisa = Request.Headers["AuthorizationCeisa"].First();
+                var data = pEBService.ReadByIdToPushAsync(id, null);
 
                 return Ok(new
                 {
@@ -236,8 +264,8 @@ namespace com.danliris.support.webapi.Controllers.v1.Ceisa
             {
                 identityService.Username = User.Claims.Single(p => p.Type.Equals("username")).Value;
                 identityService.Token = Request.Headers["Authorization"].First().Replace("Bearer ", "");
-                var authCeisa = Request.Headers["AuthorizationCeisa"].First();
-                var data = await TPBService.ReadByIdToPushAsync(id, authCeisa);
+                //var authCeisa = Request.Headers["AuthorizationCeisa"].First();
+                var data = await TPBService.ReadByIdToPushAsync(id, null);
 
                 return Ok(new
                 {
@@ -320,6 +348,34 @@ namespace com.danliris.support.webapi.Controllers.v1.Ceisa
                     new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
                     .Fail();
                 return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
+            }
+        }
+
+        [HttpPost("PostingCeisa")]
+        public async Task<IActionResult> PostingCeisa([FromBody] object data)
+        {
+            try
+            {
+                identityService.Username = User.Claims.Single(p => p.Type == "username").Value;
+                // kirim raw json ke service
+                var result = await ceisaService.PostingCeisa(data);
+
+                return Ok(new
+                {
+                    apiVersion = ApiVersion,
+                    data = result,
+                    message = General.OK_MESSAGE,
+                    statusCode = General.OK_STATUS_CODE
+                }
+               );
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    status = "error",
+                    message = ex.Message
+                });
             }
         }
     }

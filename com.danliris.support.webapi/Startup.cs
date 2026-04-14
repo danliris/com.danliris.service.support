@@ -50,6 +50,7 @@ namespace com.danliris.support.webapi
 			APIEndpoint.ConnectionString = Configuration.GetConnectionString("DefaultConnection") ?? Configuration["DefaultConnection"];
             APIEndpoint.LocalConnectionString = Configuration.GetConnectionString("LocalDbProductionConnection") ?? Configuration["LocalDbProductionConnection"];
             APIEndpoint.HostToHost = Configuration.GetValue<string>("HostToHostEndpoint") ?? Configuration["HostToHostEndpoint"];
+            APIEndpoint.APIKeyHostToHost = Configuration.GetValue<string>("APIKeyCeisa") ?? Configuration["APIKeyCeisa"];
 
             //Get Credential Ceisa
             CredentialCeisa.Username = Configuration.GetValue<string>("UsernameCeisa") ?? Configuration["UsernameCeisa"];
@@ -112,6 +113,7 @@ namespace com.danliris.support.webapi
                     };
                 });
 
+            services.AddMemoryCache();
             services
                 .AddMvcCore()
                 .AddApiExplorer()

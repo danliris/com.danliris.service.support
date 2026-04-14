@@ -36,9 +36,9 @@ namespace com.danliris.support.lib.Services.Ceisa
         public ReadResponse<object> Read(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
             IQueryable<HSModel> Query = dbSet.Where(x => x._IsDeleted == false);
+            var BarangHS = context.TPBBarang.Select(x => x.posTarif).Distinct();
 
-
-            Dictionary<string, string> FilterDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Filter);
+            var FilterDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Filter ?? "{}") ?? new Dictionary<string, string>();
             Query = QueryHelper<HSModel>.ConfigureFilter(Query, FilterDictionary);
 
             if (Keyword != null)
@@ -51,23 +51,32 @@ namespace com.danliris.support.lib.Services.Ceisa
                 Query = Query.Where(General.BuildSearch(SearchAttributes), Keyword);
             }
 
-            Dictionary<string, string> OrderDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Order);
+            Dictionary<string, string> OrderDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Order ?? "{}") ?? new Dictionary<string, string>();
             Query = QueryHelper<HSModel>.ConfigureOrder(Query, OrderDictionary);
 
-
-            Pageable<HSModel> pageable = new Pageable<HSModel>(Query, Page - 1, Size);
-            List<HSModel> Data = pageable.Data.ToList();
-            int TotalData = pageable.TotalCount;
-
-            List<object> ListData = new List<object>();
-            ListData.AddRange(Data.Select(s => new
+            var QueryResult = Query.Select(s => new
             {
                 s.Id,
                 s.HSNo,
                 s.HSRemark,
-            }));
+                isUsed = BarangHS.Contains(s.HSNo)
+            }).OrderBy(x => x.isUsed == true);
 
-            return new ReadResponse<object>(ListData, TotalData, null);
+            Pageable<dynamic> pageable = new Pageable<dynamic>(QueryResult, Page - 1, Size);
+            List<object> Data = pageable.Data
+                .Select(s => new
+                {
+                    s.Id,
+                    s.HSNo,
+                    s.HSRemark,
+                    s.isUsed
+                })
+                .Cast<object>()
+                .ToList();
+
+            int TotalData = pageable.TotalCount;
+
+            return new ReadResponse<object>(Data, TotalData, null);
         }
 
         public async Task<HSModel> ReadById(long id)

@@ -17,5 +17,13 @@ namespace com.danliris.support.lib.ViewModel.Ceisa.TPBViewModel
         public string postedBy { get; set; }
         public string CreatedDate { get; set; }
         public DateTime? tanggalDatang { get; set; }
+        public bool isBCTemps { get; set; }
+    }
+
+    public class statusCeisa
+    {
+        public string nomorAju { get; set; }
+        public string nomorDaftar { get; set; }
+        public string tanggalDaftar { get; set; }
     }
 }

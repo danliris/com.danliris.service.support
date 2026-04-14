@@ -6,6 +6,7 @@ namespace com.danliris.support.lib.ViewModel.Ceisa.TPBViewModel
 {
     public class TPBHeaderViewModel
     {
+        public int Id { get; set; }
         public string asalData { get; set; }
         public double asuransi { get; set; }
         public double bruto { get; set; }

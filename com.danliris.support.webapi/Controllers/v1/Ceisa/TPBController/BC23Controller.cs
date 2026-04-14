@@ -217,5 +217,31 @@ namespace com.danliris.support.webapi.Controllers.v1.Ceisa.TPBController
                 return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
             }
         }
+
+        [HttpPut("AddNoDaftar/{id}")]
+        public async Task<IActionResult> AddNoDaftar(int id, [FromBody] statusCeisa viewModel)
+        {
+            try
+            {
+                identityService.Username = User.Claims.Single(p => p.Type.Equals("username")).Value;
+                identityService.Token = Request.Headers["Authorization"].First().Replace("Bearer ", "");
+
+                await bC23Service.AddNoDaftar(id, viewModel);
+                return Ok(new
+                {
+                    apiVersion = ApiVersion,
+                    message = General.UPDATE_MESSAGE,
+                    statusCode = General.UPDATED_STATUS_CODE
+                });
+            }
+
+            catch (Exception e)
+            {
+                Dictionary<string, object> Result =
+                   new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
+                   .Fail();
+                return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
+            }
+        }
     }
 }

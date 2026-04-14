@@ -16,6 +16,7 @@ namespace com.danliris.support.lib.Interfaces.Ceisa
         Task<TPBHeader> ReadById(long id);
         Task<int> UpdateAsync(int id, TPBHeader viewModel);
         Task<int> Delete(int id);
+        Task<int> AddNoDaftar(int id, statusCeisa viewModel);
         Task<int> PostToSupportTPB(int id, TPBViewModelList viewModel);
     }
 }
