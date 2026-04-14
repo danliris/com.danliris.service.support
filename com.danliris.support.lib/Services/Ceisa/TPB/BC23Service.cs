@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace com.danliris.support.lib.Services.Ceisa.TPB
 {
@@ -37,6 +38,7 @@ namespace com.danliris.support.lib.Services.Ceisa.TPB
 
         public ReadResponse<object> Read(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
+            var bcTempQuery = dbSetBeacukaiTemp.Select(b => b.NoAju);
             IQueryable<TPBViewModelList> Query = dbSet.Where(s => s.kodeDokumen == "23" && s._IsDeleted == false).Select(m => new TPBViewModelList
             {
                 Id = m.Id,
@@ -47,11 +49,14 @@ namespace com.danliris.support.lib.Services.Ceisa.TPB
                 namaPenerima = m.entitas.Where(x => x.kodeEntitas == "5").Select(i => i.namaEntitas).FirstOrDefault(),
                 isPosted = m.isPosted,
                 postedBy = string.IsNullOrWhiteSpace(m.postedBy) ? "-" : m.postedBy,
-                CreatedDate = m._CreatedUtc.ToString("dd-MMM-yyyy")
+                CreatedDate = m._CreatedUtc.ToString("dd-MMM-yyyy"),
+                isBCTemps = bcTempQuery.Contains(m.nomorAju) &&
+                               !string.IsNullOrEmpty(m.nomorDaftar),
+                tanggalDatang = m.tanggalTiba
             }).OrderByDescending(x => x.nomorAju);
 
 
-            List<string> SearchAtt = new List<string>() { "namaPenerima", "nomorAju", "nomorDaftar" };
+            List<string> SearchAtt = new List<string>() { "namaPenerima", "nomorAju", "nomorDaftar", "postedBy" };
 
             Query = QueryHelper<TPBViewModelList>.ConfigureSearch(Query, SearchAtt, Keyword);
 
@@ -65,8 +70,12 @@ namespace com.danliris.support.lib.Services.Ceisa.TPB
             //List<PEBViewModel> Data = pageable.Data.ToList();
             //int TotalData = pageable.TotalCount;
 
-            List<object> ListData = new List<object>();
-            ListData.AddRange(Query.Select(s => new
+            int TotalData = Query.Count();
+
+            List<object> Data = Query
+            .Skip((Page - 1) * Size)
+            .Take(Size)
+            .Select(s => new
             {
                 s.Id,
                 s.nomorAju,
@@ -76,10 +85,13 @@ namespace com.danliris.support.lib.Services.Ceisa.TPB
                 s.namaPenerima,
                 s.isPosted,
                 s.postedBy,
-                s.CreatedDate
-            }));
+                s.CreatedDate,
+                s.isBCTemps
+            })
+            .Cast<object>()
+            .ToList();
 
-            return new ReadResponse<object>(ListData, 0, null);
+            return new ReadResponse<object>(Data, TotalData, null);
         }
         public string Urut()
         {
@@ -179,6 +191,7 @@ namespace com.danliris.support.lib.Services.Ceisa.TPB
 
             return model;
         }
+
         public async Task<int> UpdateAsync(int id, TPBHeader viewModel)
         {
             int Updated = 0;
@@ -365,7 +378,7 @@ namespace com.danliris.support.lib.Services.Ceisa.TPB
                     {
                         MoonlayEntityExtension.FlagForDelete(pungutan, identityService.Username, USER_AGENT);
                     }
-                   
+
                     Deleted = await context.SaveChangesAsync();
                     transaction.Commit();
 
@@ -379,6 +392,49 @@ namespace com.danliris.support.lib.Services.Ceisa.TPB
             }
             return Deleted;
         }
+        public async Task<int> AddNoDaftar(int id, statusCeisa viewModel)
+        {
+            using (var transaction = context.Database.CurrentTransaction ?? context.Database.BeginTransaction())
+            {
+                bool itsOK = false;
+                try
+                {
+                    int Updated = 0;
+                    var existAju = dbSetBeacukaiTemp.Select(x => x.NoAju).Distinct();
+
+                    if (existAju.Contains(viewModel.nomorAju))
+                    {
+                        itsOK = true;
+                        TPBHeader data = await ReadById(id);
+                        if (String.IsNullOrEmpty(data.nomorDaftar))
+                        {
+                            if (String.IsNullOrEmpty(viewModel.nomorDaftar) && String.IsNullOrEmpty(viewModel.tanggalDaftar))
+                            {
+                                throw new Exception($"No Daftar dan Tanggal Daftar tidak ditemukan");
+                            }
+                            data.tanggalDaftar = DateTime.Parse(viewModel.tanggalDaftar);
+                            data.nomorDaftar = viewModel.nomorDaftar;
+                            Updated = context.SaveChanges();
+                            transaction.Commit();
+                        }
+                        else
+                        {
+                            throw new Exception($"Data dengan No Aju - {viewModel.nomorAju} - sudah memiliki No Daftar");
+                        }
+                    }
+                    return Updated;
+                }
+                catch (Exception e)
+                {
+                    if (itsOK != true)
+                    {
+                        transaction.Rollback();
+                    }
+
+                    throw e;
+                }
+            }
+        }
 
         public async Task<int> PostToSupportTPB(int id, TPBViewModelList viewModel)
         {
@@ -389,16 +445,27 @@ namespace com.danliris.support.lib.Services.Ceisa.TPB
                 {
                     int Created = 0;
                     var existAju = dbSetBeacukaiTemp.Select(x => x.NoAju).Distinct();
-                  
-                    if (existAju.Contains(viewModel.nomorAju)) 
+
+                    if (existAju.Contains(viewModel.nomorAju))
                     {
                         itsOK = true;
                         TPBHeader data = await ReadById(id);
-                        data.tanggalDaftar = DateTime.Parse(viewModel.tanggalDaftar);
-                        data.nomorDaftar = viewModel.nomorDaftar;
-                        context.SaveChanges();
-                        transaction.Commit();
-                        throw new Exception($"Data dengan No Aju - {viewModel.nomorAju} - tidak disimpan karena sudah ada di database.");
+                        if (String.IsNullOrEmpty(data.nomorDaftar))
+                        {
+                            if (String.IsNullOrEmpty(viewModel.nomorDaftar) && String.IsNullOrEmpty(viewModel.tanggalDaftar))
+                            {
+                                throw new Exception($"No Daftar dan Tanggal Daftar tidak ditemukan");
+                            }
+                            data.tanggalDaftar = DateTime.Parse(viewModel.tanggalDaftar);
+                            data.nomorDaftar = viewModel.nomorDaftar;
+                            context.SaveChanges();
+                            transaction.Commit();
+                            throw new Exception($"Data dengan No Aju - {viewModel.nomorAju} - tidak disimpan karena sudah ada di database.");
+                        }
+                        else
+                        {
+                            throw new Exception($"Data dengan No Aju - {viewModel.nomorAju} - sudah memiliki No Daftar");
+                        }
                     } else
                     {
                         TPBHeader data = await ReadById(id);

@@ -10,12 +10,14 @@ namespace com.danliris.support.lib.Interfaces.Ceisa
     {
         Task<List<RateValutaViewModel>> GetValutaRate(string kode, string token);
         Task<List<LartasViewModel>> GetLartas(string kode, string token);
-        Task<ManifesBC11ViewModel> GetManifestBC11(string kodeKantor, string noHostBl, DateTime tglHostBl, string token);
+        Task<ManifesBC11ViewModel> GetManifestBC11(string kodeKantor, string noHostBl, DateTime tglHostBl,string nama, string token);
         Task<List<ResponViewModel>> GetRespon(string kode, string token);
         Task<List<LartasViewModel>> GetTarifHS(string kode, string token);
-
+        Task<List<PelabuhanViewModel>> GetPelabuhan(string kodeKantor, string token);
         Task<ResultLoginCeisa> Login();
         Task<ResultLoginCeisa> RefreshToken();
+        Task<string> RefreshAccessToken();
+        Task<object> PostingCeisa(object data);
 
     }
 }
