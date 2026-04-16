@@ -38,7 +38,6 @@ namespace com.danliris.support.lib.Services.Ceisa.TPB
 
         public ReadResponse<object> Read(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
-            var bcTempQuery = dbSetBeacukaiTemp.Select(b => b.NoAju);
             IQueryable<TPBViewModelList> Query = dbSet.Where(s => s.kodeDokumen == "23" && s._IsDeleted == false).Select(m => new TPBViewModelList
             {
                 Id = m.Id,
@@ -50,10 +49,11 @@ namespace com.danliris.support.lib.Services.Ceisa.TPB
                 isPosted = m.isPosted,
                 postedBy = string.IsNullOrWhiteSpace(m.postedBy) ? "-" : m.postedBy,
                 CreatedDate = m._CreatedUtc.ToString("dd-MMM-yyyy"),
-                isBCTemps = bcTempQuery.Contains(m.nomorAju) &&
-                               !string.IsNullOrEmpty(m.nomorDaftar),
+                isBCTemps = dbSetBeacukaiTemp.Any(b => b.NoAju == m.nomorAju) && !string.IsNullOrEmpty(m.nomorDaftar),
                 tanggalDatang = m.tanggalTiba
-            }).OrderByDescending(x => x.nomorAju);
+            }).OrderBy(x => x.isBCTemps)
+              .ThenBy(x => x.isPosted)
+              .ThenByDescending(x => x.nomorAju);
 
 
             List<string> SearchAtt = new List<string>() { "namaPenerima", "nomorAju", "nomorDaftar", "postedBy" };
