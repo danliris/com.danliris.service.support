@@ -11,9 +11,10 @@ using System;
 namespace com.danliris.support.lib.Migrations
 {
     [DbContext(typeof(SupportDbContext))]
-    partial class SupportDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260422025902_MigrationOld")]
+    partial class MigrationOld
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1949,58 +1950,6 @@ namespace com.danliris.support.lib.Migrations
                     b.ToTable("TPBPungutan");
                 });
 
-            modelBuilder.Entity("com.danliris.support.lib.Models.Ceisa.TPB.TPBStatusRespon", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<bool>("Active");
-
-                    b.Property<long>("IdHeader");
-
-                    b.Property<string>("_CreatedAgent");
-
-                    b.Property<string>("_CreatedBy");
-
-                    b.Property<DateTime>("_CreatedUtc");
-
-                    b.Property<string>("_DeletedAgent");
-
-                    b.Property<string>("_DeletedBy");
-
-                    b.Property<DateTime>("_DeletedUtc");
-
-                    b.Property<bool>("_IsDeleted");
-
-                    b.Property<string>("_LastModifiedAgent");
-
-                    b.Property<string>("_LastModifiedBy");
-
-                    b.Property<DateTime>("_LastModifiedUtc");
-
-                    b.Property<string>("kodeDokumenPendukung");
-
-                    b.Property<string>("kodeDokumenUtama");
-
-                    b.Property<string>("kodeProses");
-
-                    b.Property<string>("namaDokumenPendukung");
-
-                    b.Property<string>("namaDokumenUtama");
-
-                    b.Property<string>("nomorDokumenPendukung");
-
-                    b.Property<string>("nomorDokumenUtama");
-
-                    b.Property<string>("statusProses");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IdHeader");
-
-                    b.ToTable("TPBStatusRespon");
-                });
-
             modelBuilder.Entity("com.danliris.support.lib.Models.FactBeacukai", b =>
                 {
                     b.Property<string>("DetailshippingOrderId")
@@ -2659,14 +2608,6 @@ namespace com.danliris.support.lib.Migrations
                 {
                     b.HasOne("com.danliris.support.lib.Models.Ceisa.TPB.TPBHeader", "TPBHeader")
                         .WithMany("pungutan")
-                        .HasForeignKey("IdHeader")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("com.danliris.support.lib.Models.Ceisa.TPB.TPBStatusRespon", b =>
-                {
-                    b.HasOne("com.danliris.support.lib.Models.Ceisa.TPB.TPBHeader", "TPBHeader")
-                        .WithMany("statusRespons")
                         .HasForeignKey("IdHeader")
                         .OnDelete(DeleteBehavior.Cascade);
                 });

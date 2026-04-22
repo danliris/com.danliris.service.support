@@ -1,8 +1,9 @@
-﻿using System.Threading.Tasks;
-using System.Collections.Generic;
-using com.danliris.support.lib.ViewModel.Ceisa;
-using static com.danliris.support.lib.Services.Ceisa.CeisaService;
+﻿using com.danliris.support.lib.ViewModel.Ceisa;
+using com.danliris.support.lib.ViewModel.Ceisa.TPBViewModel;
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using static com.danliris.support.lib.Services.Ceisa.CeisaService;
 
 namespace com.danliris.support.lib.Interfaces.Ceisa
 {
@@ -18,6 +19,9 @@ namespace com.danliris.support.lib.Interfaces.Ceisa
         Task<ResultLoginCeisa> RefreshToken();
         Task<string> RefreshAccessToken();
         Task<object> PostingCeisa(object data);
+        Task<byte[]> GetPdfFromExternalApi(string noAju);
+        Task<byte[]> GetPdfDokFromExternalApi(string no ,string noAju);
+        Task<TPBStatusResponViewModel> GetResponAll(string noAju);
 
     }
 }

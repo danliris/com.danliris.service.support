@@ -11,9 +11,10 @@ using System;
 namespace com.danliris.support.lib.Migrations
 {
     [DbContext(typeof(SupportDbContext))]
-    partial class SupportDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260422032002_AddTableStatusRespon")]
+    partial class AddTableStatusRespon
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

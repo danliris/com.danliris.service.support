@@ -18,6 +18,18 @@ namespace com.danliris.support.lib.ViewModel.Ceisa.TPBViewModel
         public string CreatedDate { get; set; }
         public DateTime? tanggalDatang { get; set; }
         public bool isBCTemps { get; set; }
+
+        //StatusRespon
+        public string kodeProses { get; set; }
+        public string statusProses { get; set; }
+
+        public string kodeDokumenUtama { get; set; }
+        public string namaDokumenUtama { get; set; }
+        public string nomorDokumenUtama { get; set; }
+
+        public string kodeDokumenPendukung { get; set; }
+        public string namaDokumenPendukung { get; set; }
+        public string nomorDokumenPendukung { get; set; }
     }
 
     public class statusCeisa

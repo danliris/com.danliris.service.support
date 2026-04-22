@@ -41,6 +41,7 @@ namespace com.danliris.support.lib
         public DbSet<TPBBarang_Dokumen> TPBBarang_Dokumen { get; set; }
         public DbSet<TPBBarang_BahanBaku> TPBBarang_BahanBaku { get; set; }
         public DbSet<TPBBarang_BahanBakuTarif> TPBBarang_BahanBakuTarif { get; set; }
+        public DbSet<TPBStatusRespon> TPBStatusRespon { get; set; }
 
 
 

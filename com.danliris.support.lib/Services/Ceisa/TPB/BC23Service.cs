@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static iTextSharp.text.pdf.events.IndexEvents;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace com.danliris.support.lib.Services.Ceisa.TPB
@@ -50,7 +51,19 @@ namespace com.danliris.support.lib.Services.Ceisa.TPB
                 postedBy = string.IsNullOrWhiteSpace(m.postedBy) ? "-" : m.postedBy,
                 CreatedDate = m._CreatedUtc.ToString("dd-MMM-yyyy"),
                 isBCTemps = dbSetBeacukaiTemp.Any(b => b.NoAju == m.nomorAju) && !string.IsNullOrEmpty(m.nomorDaftar),
-                tanggalDatang = m.tanggalTiba
+                tanggalDatang = m.tanggalTiba,
+
+                kodeProses = m.statusRespons.Select(x => x.kodeProses).FirstOrDefault(),
+                statusProses = m.statusRespons.Select(x => x.statusProses).FirstOrDefault(),
+
+                kodeDokumenUtama = m.statusRespons.Select(x => x.kodeDokumenUtama).FirstOrDefault(),
+                namaDokumenUtama = m.statusRespons.Select(x => x.namaDokumenUtama).FirstOrDefault(),
+                nomorDokumenUtama = m.statusRespons.Select(x => x.nomorDokumenUtama).FirstOrDefault(),
+
+                kodeDokumenPendukung = m.statusRespons.Select(x => x.kodeDokumenPendukung).FirstOrDefault(),
+                namaDokumenPendukung = m.statusRespons.Select(x => x.namaDokumenPendukung).FirstOrDefault(),
+                nomorDokumenPendukung = m.statusRespons.Select(x => x.nomorDokumenPendukung).FirstOrDefault()
+
             }).OrderBy(x => x.isBCTemps)
               .ThenBy(x => x.isPosted)
               .ThenByDescending(x => x.nomorAju);
@@ -86,7 +99,15 @@ namespace com.danliris.support.lib.Services.Ceisa.TPB
                 s.isPosted,
                 s.postedBy,
                 s.CreatedDate,
-                s.isBCTemps
+                s.isBCTemps,
+                s.kodeProses,
+                s.statusProses,
+                s.kodeDokumenUtama,
+                s.namaDokumenUtama,
+                s.nomorDokumenUtama,
+                s.kodeDokumenPendukung,
+                s.namaDokumenPendukung,
+                s.nomorDokumenPendukung
             })
             .Cast<object>()
             .ToList();
@@ -432,6 +453,75 @@ namespace com.danliris.support.lib.Services.Ceisa.TPB
                     }
 
                     throw e;
+                }
+            }
+        }
+
+        public async Task<int> AddStatusRespon(int id, TPBStatusResponViewModel viewModel)
+        {
+            using (var transaction = await context.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    int updated = 0;
+                    var data = await context.TPBHeader
+                                .Include(x => x.statusRespons)
+                                .FirstOrDefaultAsync(x => x.Id == id);
+                    if (data == null)
+                        throw new Exception("Data tidak ditemukan");
+
+                    if (data.statusRespons == null)
+                        data.statusRespons = new List<TPBStatusRespon>();
+
+                    var existing = data.statusRespons
+                        .OrderByDescending(x => x.Id)
+                        .FirstOrDefault();
+
+                    if (existing != null)
+                    {
+                        existing.kodeProses = viewModel.kodeProses;
+                        existing.statusProses = viewModel.statusProses;
+
+                        existing.kodeDokumenUtama = viewModel.kodeDokumenUtama;
+                        existing.namaDokumenUtama = viewModel.namaDokumenUtama;
+                        existing.nomorDokumenUtama = viewModel.nomorDokumenUtama;
+
+                        existing.kodeDokumenPendukung = viewModel.kodeDokumenPendukung;
+                        existing.namaDokumenPendukung = viewModel.namaDokumenPendukung;
+                        existing.nomorDokumenPendukung = viewModel.nomorDokumenPendukung;
+                        MoonlayEntityExtension.FlagForUpdate(existing, identityService.Username, USER_AGENT);
+                        context.Update(existing);
+                    }
+                    else
+                    {
+                        data.statusRespons.Add(new TPBStatusRespon
+                        {
+                            _CreatedBy = identityService.Username,
+                            _CreatedUtc = DateTime.UtcNow,
+                            _CreatedAgent = USER_AGENT,
+                            kodeProses = viewModel.kodeProses,
+                            statusProses = viewModel.statusProses,
+
+                            kodeDokumenUtama = viewModel.kodeDokumenUtama,
+                            namaDokumenUtama = viewModel.namaDokumenUtama,
+                            nomorDokumenUtama = viewModel.nomorDokumenUtama,
+
+                            kodeDokumenPendukung = viewModel.kodeDokumenPendukung,
+                            namaDokumenPendukung = viewModel.namaDokumenPendukung,
+                            nomorDokumenPendukung = viewModel.nomorDokumenPendukung
+                        });
+                        context.Update(data);
+                    }
+
+                    updated = context.SaveChanges();
+                    transaction.Commit();
+
+                    return updated;
+                }
+                catch
+                {
+                    transaction.Rollback();
+                    throw;
                 }
             }
         }
