@@ -88,6 +88,7 @@ namespace com.danliris.support.lib.Models.Ceisa.TPB
         public virtual ICollection<TPBBahanBaku> bahanBaku { get; set; }
         public virtual ICollection<TPBBahanBakuTarif> bahanBakuTarif { get; set; }
         public virtual ICollection<TPBJaminan> jaminan { get; set; }
+        public virtual ICollection<TPBStatusRespon> statusRespons { get; set; }
 
 
     }

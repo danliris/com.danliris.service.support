@@ -1,10 +1,14 @@
 ﻿using com.danliris.support.lib.Helpers;
 using com.danliris.support.lib.Interfaces.Ceisa;
+using com.danliris.support.lib.Models.Ceisa.TPB;
 using com.danliris.support.lib.ViewModel.Ceisa;
+using com.danliris.support.lib.ViewModel.Ceisa.TPBViewModel;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -383,6 +387,164 @@ namespace com.danliris.support.lib.Services.Ceisa
                     $"{APIEndpoint.HostToHost}v2/openapi/document", content);
                 var json = await response.Content.ReadAsStringAsync();
                 return json;
+            }
+        }
+
+        public async Task<byte[]> GetPdfFromExternalApi(string noAju)
+        {
+            using (var client = new HttpClient())
+            {
+                var authtoken = await GetValidAccessToken();
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authtoken);
+                client.DefaultRequestHeaders.Add("beacukai-api-key", APIEndpoint.APIKeyHostToHost);
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+
+
+                var response = await client.GetAsync(
+                    $"{APIEndpoint.HostToHost}v2/openapi/respon/cetak-formulir/final?nomorAju={noAju}");
+                return await response.Content.ReadAsByteArrayAsync();
+            }
+        }
+
+        public async Task<byte[]> GetPdfDokFromExternalApi(string no, string noAju)
+        {
+            using (var client = new HttpClient())
+            {
+                var authtoken = await GetValidAccessToken();
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authtoken);
+                client.DefaultRequestHeaders.Add("beacukai-api-key", APIEndpoint.APIKeyHostToHost);
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+
+
+                var response = await client.GetAsync(
+                    $"{APIEndpoint.HostToHost}v2/openapi/respon/pdf?kodeRespon={no}&nomorAju={noAju}");
+                return await response.Content.ReadAsByteArrayAsync();
+            }
+        }
+
+        public async Task<TPBStatusResponViewModel> GetResponAll(string noAju)
+        {
+            using (var client = new HttpClient())
+            {
+                var authtoken = await GetValidAccessToken();
+                client.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", authtoken);
+
+                // 🔹 ambil kode aju (index 5-6)
+                string kodeAju = (!string.IsNullOrEmpty(noAju) && noAju.Length >= 7)
+                    ? noAju.Substring(4, 2)
+                    : string.Empty;
+
+                var response = await client.GetAsync($"{APIEndpoint.HostToHost}openapi/status/{noAju}");
+
+                if (!response.IsSuccessStatusCode)
+                    return new TPBStatusResponViewModel();
+
+                var content = await response.Content.ReadAsStringAsync();
+
+                JObject result;
+                try
+                {
+                    result = JObject.Parse(content);
+                }
+                catch
+                {
+                    throw new Exception("Format response tidak valid");
+                }
+
+                var status = result["status"]?.ToString();
+
+                if (string.Equals(status, "failed", StringComparison.OrdinalIgnoreCase))
+                {
+                    var msgToken = result["message"];
+
+                    string message = "Terjadi kesalahan";
+
+                    if (msgToken is JArray arr)
+                    {
+                        message = string.Join(", ", arr.ToObject<List<string>>() ?? new List<string>());
+                    }
+                    else if (msgToken != null)
+                    {
+                        message = msgToken.ToString();
+                    }
+
+                    throw new Exception(message);
+                }
+
+                var dataStatusArr = result["dataStatus"] as JArray ?? new JArray();
+                var dataResponArr = result["dataRespon"] as JArray ?? new JArray();
+
+                var lastStatus = dataStatusArr
+                    .OrderByDescending(x =>
+                    {
+                        return DateTime.TryParse(x["waktuStatus"]?.ToString(), out var dt)
+                            ? dt
+                            : DateTime.MinValue;
+                    })
+                    .FirstOrDefault();
+
+                string kodeProses = lastStatus?["kodeProses"]?.ToString();
+                string statusProses = lastStatus?["keterangan"]?.ToString();
+
+                JToken dokumenUtama = null;
+
+                if (new[] { "23", "40", "27", "26" }.Contains(kodeAju))
+                {
+                    dokumenUtama = dataResponArr.FirstOrDefault(x =>
+                        x["keterangan"]?.ToString() == "SPPB" ||
+                        x["keterangan"]?.ToString() == "SPPKB");
+                }
+                else if (kodeAju == "25")
+                {
+                    dokumenUtama = dataResponArr.FirstOrDefault(x =>
+                        x["keterangan"]?.ToString() == "BILLING");
+                }
+                else if (kodeAju == "30")
+                {
+                    dokumenUtama = dataResponArr.FirstOrDefault(x =>
+                        x["keterangan"]?.ToString() == "NPE");
+                }
+
+                string kodeDokumenUtama = dokumenUtama?["kodeRespon"]?.ToString();
+                string namaDokumenUtama = dokumenUtama?["keterangan"]?.ToString();
+                string nomorDokumenUtama = dokumenUtama?["nomorRespon"]?.ToString();
+
+                var dokumenPendukung = dataResponArr
+                    .Where(x =>
+                    {
+                        var ket = x["keterangan"]?.ToString();
+
+                        // exclude dokumen utama
+                        if (dokumenUtama != null)
+                            return !JToken.DeepEquals(x, dokumenUtama);
+
+                        return true;
+                    })
+                    .ToList();
+
+                var firstPendukung = dokumenPendukung.FirstOrDefault();
+
+                string kodeDokumenPendukung = firstPendukung?["kodeRespon"]?.ToString();
+                string namaDokumenPendukung = firstPendukung?["keterangan"]?.ToString();
+                string nomorDokumenPendukung = firstPendukung?["nomorRespon"]?.ToString();
+
+                var vm = new TPBStatusResponViewModel
+                {
+                    noAju = noAju,
+                    kodeProses = kodeProses,
+                    statusProses = statusProses,
+
+                    kodeDokumenUtama = kodeDokumenUtama,
+                    namaDokumenUtama = namaDokumenUtama,
+                    nomorDokumenUtama = nomorDokumenUtama,
+
+                    kodeDokumenPendukung = kodeDokumenPendukung,
+                    namaDokumenPendukung = namaDokumenPendukung,
+                    nomorDokumenPendukung = nomorDokumenPendukung
+                };
+
+                return vm;
             }
         }
     }

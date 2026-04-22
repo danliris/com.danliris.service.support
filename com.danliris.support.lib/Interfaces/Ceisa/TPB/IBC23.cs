@@ -18,5 +18,6 @@ namespace com.danliris.support.lib.Interfaces.Ceisa
         Task<int> Delete(int id);
         Task<int> AddNoDaftar(int id, statusCeisa viewModel);
         Task<int> PostToSupportTPB(int id, TPBViewModelList viewModel);
+        Task<int> AddStatusRespon(int id, TPBStatusResponViewModel viewModel);
     }
 }

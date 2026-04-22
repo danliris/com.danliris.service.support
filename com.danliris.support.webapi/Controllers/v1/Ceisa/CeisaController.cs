@@ -1,16 +1,17 @@
-﻿using System;
-using AutoMapper;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Com.DanLiris.Service.support.lib.Services;
+﻿using AutoMapper;
 using com.danliris.support.lib.Interfaces;
-using com.danliris.support.webapi.Helpers;
 using com.danliris.support.lib.Interfaces.Ceisa;
 using com.danliris.support.lib.Interfaces.Ceisa.TPB;
+using com.danliris.support.lib.Services.Ceisa;
+using com.danliris.support.webapi.Helpers;
+using Com.DanLiris.Service.support.lib.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace com.danliris.support.webapi.Controllers.v1.Ceisa
 {
@@ -376,6 +377,75 @@ namespace com.danliris.support.webapi.Controllers.v1.Ceisa
                     status = "error",
                     message = ex.Message
                 });
+            }
+        }
+
+        [HttpGet("getPDFView")]
+        public async Task<IActionResult> PDFtoView(string noAju)
+        {
+            try
+            {
+                identityService.Username = User.Claims.Single(p => p.Type == "username").Value;
+                // kirim raw json ke service
+                var result = await ceisaService.GetPdfFromExternalApi(noAju);
+                return File(result, "application/pdf", "file.pdf");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    status = "error",
+                    message = ex.Message
+                });
+            }
+        }
+
+        [HttpGet("getPDFViewDok")]
+        public async Task<IActionResult> PDFtoViewDokumen(string kodeRespon,string noAju)
+        {
+            try
+            {
+                identityService.Username = User.Claims.Single(p => p.Type == "username").Value;
+                var result = await ceisaService.GetPdfDokFromExternalApi(kodeRespon,noAju);
+                return File(result, "application/pdf", "file.pdf");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    status = "error",
+                    message = ex.Message
+                });
+            }
+        }
+
+
+
+        [HttpGet("statusDokumen")]
+        public async Task<IActionResult> GetStatusDokumen(string noAju)
+        {
+            try
+            {
+                identityService.Username = User.Claims.Single(p => p.Type.Equals("username")).Value;
+                identityService.Token = Request.Headers["Authorization"].First().Replace("Bearer ", "");
+                //var authCeisa = Request.Headers["AuthorizationCeisa"].First();
+                var data = await ceisaService.GetResponAll(noAju);
+
+                return Ok(new
+                {
+                    apiVersion = ApiVersion,
+                    data = data,
+                    message = General.OK_MESSAGE,
+                    statusCode = General.OK_STATUS_CODE
+                }
+                );
+            }
+            catch (Exception e)
+            {
+                Dictionary<string, object> Result =
+                    new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
+                    .Fail();
+                return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
             }
         }
     }
