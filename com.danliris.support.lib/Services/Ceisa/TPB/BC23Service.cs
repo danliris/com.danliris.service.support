@@ -37,21 +37,56 @@ namespace com.danliris.support.lib.Services.Ceisa.TPB
             identityService = (IdentityService)serviceProvider.GetService(typeof(IdentityService));
         }
 
+        public class TPBQueryDto
+        {
+            public long Id { get; set; }
+            public string nomorAju { get; set; }
+            public DateTime tanggalAju { get; set; }
+            public string nomorDaftar { get; set; }
+            public DateTime? tanggalDaftar { get; set; }
+            public string namaPenerima { get; set; }
+            public bool isPosted { get; set; }
+            public string postedBy { get; set; }
+            public DateTime _CreatedUtc { get; set; }
+            public DateTime? tanggalTiba { get; set; }
+            public bool isBCTemps { get; set; }
+
+            public string kodeProses { get; set; }
+            public string statusProses { get; set; }
+
+            public string kodeDokumenUtama { get; set; }
+            public string namaDokumenUtama { get; set; }
+            public string nomorDokumenUtama { get; set; }
+
+            public string kodeDokumenPendukung { get; set; }
+            public string namaDokumenPendukung { get; set; }
+            public string nomorDokumenPendukung { get; set; }
+        }
+
         public ReadResponse<object> Read(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
-            IQueryable<TPBViewModelList> Query = dbSet.Where(s => s.kodeDokumen == "23" && s._IsDeleted == false).Select(m => new TPBViewModelList
+            // QUERY DATABASE (PURE - NO ToString, NO COMPLEX LOGIC)
+            var baseQuery = dbSet
+            .Where(s => s.kodeDokumen == "23" && !s._IsDeleted)
+            .Select(m => new TPBQueryDto
             {
                 Id = m.Id,
                 nomorAju = m.nomorAju,
-                tanggalAju = m.tanggalAju.ToString("dd-MMM-yyyy"),
-                nomorDaftar = string.IsNullOrWhiteSpace(m.nomorDaftar) ? "-" : m.nomorDaftar,
-                tanggalDaftar = m.tanggalDaftar == null ? "-" : m.tanggalDaftar.Value.ToString("dd-MMM-yyyy"),
-                namaPenerima = m.entitas.Where(x => x.kodeEntitas == "5").Select(i => i.namaEntitas).FirstOrDefault(),
+                tanggalAju = m.tanggalAju,
+                nomorDaftar = m.nomorDaftar,
+                tanggalDaftar = m.tanggalDaftar,
+
+                namaPenerima = m.entitas
+                    .Where(x => x.kodeEntitas == "5")
+                    .Select(i => i.namaEntitas)
+                    .FirstOrDefault(),
+
                 isPosted = m.isPosted,
-                postedBy = string.IsNullOrWhiteSpace(m.postedBy) ? "-" : m.postedBy,
-                CreatedDate = m._CreatedUtc.ToString("dd-MMM-yyyy"),
-                isBCTemps = dbSetBeacukaiTemp.Any(b => b.NoAju == m.nomorAju) && !string.IsNullOrEmpty(m.nomorDaftar),
-                tanggalDatang = m.tanggalTiba,
+                postedBy = m.postedBy,
+                _CreatedUtc = m._CreatedUtc,
+                tanggalTiba = m.tanggalTiba,
+
+                //isBCTemps = false,
 
                 kodeProses = m.statusRespons.Select(x => x.kodeProses).FirstOrDefault(),
                 statusProses = m.statusRespons.Select(x => x.statusProses).FirstOrDefault(),
@@ -63,43 +98,32 @@ namespace com.danliris.support.lib.Services.Ceisa.TPB
                 kodeDokumenPendukung = m.statusRespons.Select(x => x.kodeDokumenPendukung).FirstOrDefault(),
                 namaDokumenPendukung = m.statusRespons.Select(x => x.namaDokumenPendukung).FirstOrDefault(),
                 nomorDokumenPendukung = m.statusRespons.Select(x => x.nomorDokumenPendukung).FirstOrDefault()
-
-            }).OrderBy(x => x.isBCTemps)
-              .ThenBy(x => x.isPosted)
-              .ThenByDescending(x => x.nomorAju);
-
+            });
 
             List<string> SearchAtt = new List<string>() { "namaPenerima", "nomorAju", "nomorDaftar", "postedBy" };
+            var query = QueryHelper<TPBQueryDto>.ConfigureSearch(baseQuery, SearchAtt, Keyword);
 
-            Query = QueryHelper<TPBViewModelList>.ConfigureSearch(Query, SearchAtt, Keyword);
+            int TotalData = query.Count();
 
-            //Dictionary<string, string> FilterDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Filter);
-            //Query = QueryHelper<PEBViewModel>.ConfigureFilter(Query, FilterDictionary);
+            var rawData = query
+                .OrderByDescending(x => x.nomorAju)
+                .Skip((Page - 1) * Size)
+                .Take(Size)
+                .ToList();
 
-            //Dictionary<string, string> OrderDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Order);
-            //Query = QueryHelper<PEBViewModel>.ConfigureOrder(Query, OrderDictionary);
-
-            //Pageable<PEBViewModel> pageable = new Pageable<PEBViewModel>(Query, Page - 1, Size);
-            //List<PEBViewModel> Data = pageable.Data.ToList();
-            //int TotalData = pageable.TotalCount;
-
-            int TotalData = Query.Count();
-
-            List<object> Data = Query
-            .Skip((Page - 1) * Size)
-            .Take(Size)
-            .Select(s => new
+            var Data = rawData.Select(s => new
             {
                 s.Id,
                 s.nomorAju,
-                s.tanggalAju,
-                s.nomorDaftar,
-                s.tanggalDaftar,
+                tanggalAju = s.tanggalAju.ToString("dd-MMM-yyyy"),
+                nomorDaftar = string.IsNullOrWhiteSpace(s.nomorDaftar) ? "-" : s.nomorDaftar,
+                tanggalDaftar = s.tanggalDaftar == null ? "-" : s.tanggalDaftar.Value.ToString("dd-MMM-yyyy"),
                 s.namaPenerima,
                 s.isPosted,
-                s.postedBy,
-                s.CreatedDate,
-                s.isBCTemps,
+                postedBy = string.IsNullOrWhiteSpace(s.postedBy) ? "-" : s.postedBy,
+                CreatedDate = s._CreatedUtc.ToString("dd-MMM-yyyy"),
+                isBCTemps = dbSetBeacukaiTemp.Any(b => b.NoAju == s.nomorAju) && !string.IsNullOrEmpty(s.nomorDaftar),
+
                 s.kodeProses,
                 s.statusProses,
                 s.kodeDokumenUtama,
@@ -108,9 +132,7 @@ namespace com.danliris.support.lib.Services.Ceisa.TPB
                 s.kodeDokumenPendukung,
                 s.namaDokumenPendukung,
                 s.nomorDokumenPendukung
-            })
-            .Cast<object>()
-            .ToList();
+            }).Cast<object>().ToList();
 
             return new ReadResponse<object>(Data, TotalData, null);
         }
