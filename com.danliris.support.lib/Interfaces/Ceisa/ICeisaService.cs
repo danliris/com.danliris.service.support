@@ -22,6 +22,8 @@ namespace com.danliris.support.lib.Interfaces.Ceisa
         Task<byte[]> GetPdfFromExternalApi(string noAju);
         Task<byte[]> GetPdfDokFromExternalApi(string no ,string noAju);
         Task<TPBStatusResponViewModel> GetResponAll(string noAju);
+        Task<List<TPSGudangViewModel>> getTPS(string kodeKantor);
+        Task<List<PelabuhanViewModel>> GetPelabuhanLuar(string kodePelabuhan);
 
     }
 }

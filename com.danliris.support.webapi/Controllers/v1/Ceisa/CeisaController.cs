@@ -448,5 +448,61 @@ namespace com.danliris.support.webapi.Controllers.v1.Ceisa
                 return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
             }
         }
+
+        [HttpGet("getTps")]
+        public async Task<IActionResult> getTPS(string kodeKantor)
+        {
+            try
+            {
+                identityService.Username = User.Claims.Single(p => p.Type.Equals("username")).Value;
+                //var authCeisa = Request.Headers["AuthorizationCeisa"].First();
+
+                var data = await ceisaService.getTPS(kodeKantor);
+
+                return Ok(new
+                {
+                    apiVersion = ApiVersion,
+                    data = data,
+                    message = General.OK_MESSAGE,
+                    statusCode = General.OK_STATUS_CODE
+                }
+                );
+            }
+            catch (Exception e)
+            {
+                Dictionary<string, object> Result =
+                    new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
+                    .Fail();
+                return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
+            }
+        }
+
+        [HttpGet("getPelabuhanLuar")]
+        public async Task<IActionResult> getPelabuhanLuar(string kodePelabuhan)
+        {
+            try
+            {
+                identityService.Username = User.Claims.Single(p => p.Type.Equals("username")).Value;
+                //var authCeisa = Request.Headers["AuthorizationCeisa"].First();
+
+                var data = await ceisaService.GetPelabuhanLuar(kodePelabuhan);
+
+                return Ok(new
+                {
+                    apiVersion = ApiVersion,
+                    data = data,
+                    message = General.OK_MESSAGE,
+                    statusCode = General.OK_STATUS_CODE
+                }
+                );
+            }
+            catch (Exception e)
+            {
+                Dictionary<string, object> Result =
+                    new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
+                    .Fail();
+                return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
+            }
+        }
     }
 }

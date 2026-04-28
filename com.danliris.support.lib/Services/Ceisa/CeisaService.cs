@@ -358,7 +358,7 @@ namespace com.danliris.support.lib.Services.Ceisa
                         }
                     }
 
-                    List<ResponViewModel> viewModel = JsonConvert.DeserializeObject<List<ResponViewModel>>(result.GetValueOrDefault("dataRespon").ToString()); ;
+                    List<ResponViewModel> viewModel = JsonConvert.DeserializeObject<List<ResponViewModel>>(result.GetValueOrDefault("dataRespon").ToString());
                     return viewModel;
                 }
                 else
@@ -430,7 +430,6 @@ namespace com.danliris.support.lib.Services.Ceisa
                 client.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", authtoken);
 
-                // 🔹 ambil kode aju (index 5-6)
                 string kodeAju = (!string.IsNullOrEmpty(noAju) && noAju.Length >= 7)
                     ? noAju.Substring(4, 2)
                     : string.Empty;
@@ -515,7 +514,6 @@ namespace com.danliris.support.lib.Services.Ceisa
                     {
                         var ket = x["keterangan"]?.ToString();
 
-                        // exclude dokumen utama
                         if (dokumenUtama != null)
                             return !JToken.DeepEquals(x, dokumenUtama);
 
@@ -545,6 +543,53 @@ namespace com.danliris.support.lib.Services.Ceisa
                 };
 
                 return vm;
+            }
+        }
+
+
+        public class TPSGudangViewModel
+        {
+            public string kodeGudang { get; set; }
+            public string namaGudang { get; set; }
+            public string kodeKantor { get; set; }
+        }
+
+        public async Task<List<TPSGudangViewModel>> getTPS(string kodeKantor)
+        {
+            using (var client = new HttpClient())
+            {
+                var authtoken = await GetValidAccessToken();
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authtoken);
+                client.DefaultRequestHeaders.Add("beacukai-api-key", APIEndpoint.APIKeyHostToHost);
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+                var response = await client.GetAsync(
+                    $"{APIEndpoint.HostToHost}v2/openapi/referensi/tps-gudang/{kodeKantor}");
+                response.EnsureSuccessStatusCode();
+                var content = response.Content.ReadAsStringAsync().Result;
+                Dictionary<string, object> result = JsonConvert.DeserializeObject<Dictionary<string, object>>(content);
+                List<TPSGudangViewModel> viewModel = JsonConvert.DeserializeObject<List<TPSGudangViewModel>>(result.GetValueOrDefault("data").ToString());
+
+                return viewModel ?? new List<TPSGudangViewModel>();
+            }
+        }
+
+        public async Task<List<PelabuhanViewModel>> GetPelabuhanLuar(string kodePelabuhan)
+        {
+            using (var client = new HttpClient())
+            {
+                var authtoken = await GetValidAccessToken();
+
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authtoken);
+                client.DefaultRequestHeaders.Add("beacukai-api-key", APIEndpoint.APIKeyHostToHost);
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+                
+                var response = await client.GetAsync(
+                    $"{APIEndpoint.HostToHost}v2/openapi/referensi/pelabuhan-luar-negeri/{kodePelabuhan}");
+                var content = response.Content.ReadAsStringAsync().Result;
+                Dictionary<string, object> result = JsonConvert.DeserializeObject<Dictionary<string, object>>(content);
+                List<PelabuhanViewModel> viewModel = JsonConvert.DeserializeObject<List<PelabuhanViewModel>>(result.GetValueOrDefault("data").ToString());
+
+                return viewModel ?? new List<PelabuhanViewModel>();
             }
         }
     }
