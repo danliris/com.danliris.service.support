@@ -92,5 +92,24 @@ namespace com.danliris.support.webapi.Controllers.v1
             }
         }
 
+        [HttpGet("downloadExcelReportBC")]
+        public IActionResult GenerateExcelDivision(string typeBC, string dateFrom, string dateTo)
+        {
+
+            try
+            {
+                var timezoneOffset = Request.Headers["x-timezone-offset"].FirstOrDefault();
+                var stream = Service.GenerateExcelReport(typeBC, dateFrom, dateTo, timezoneOffset);
+                var filename = $"Report Posting It Inventory {typeBC ?? "BC"} - {dateFrom} to {dateTo}";
+                filename += ".xls";
+
+                var bytes = stream.ToArray();
+                return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", filename);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, e.Message + " " + e.StackTrace);
+            }
+        }
     }
 }
